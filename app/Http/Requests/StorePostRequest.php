@@ -11,7 +11,7 @@ class StorePostRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return true;
+        return true;  // minden felhasználó engedélyezve van a kéréshez
     }
 
     /**

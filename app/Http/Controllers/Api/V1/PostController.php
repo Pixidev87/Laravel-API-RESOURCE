@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StorePostRequest;
+use App\Http\Resources\PostResource;
 use App\Models\Post;
 use Illuminate\Http\Request;
 
@@ -14,7 +15,7 @@ class PostController extends Controller
      */
     public function index()
     {
-        return  Post::all();
+        return  PostResource::collection(Post::with('author')->paginate(2));  // Eager load az author kapcsolatot, 2 elem per oldal
     }
 
     /**
@@ -27,35 +28,35 @@ class PostController extends Controller
         //$data = $request->only(['title', 'body']);
 
         $data['author_id'] = 1;
-        $post = Post::create($data);
+        $post = Post::create($data); // létrehozás az engedélyezett mezőkkel
 
-        return response()->json($post, 201);
+        return new PostResource($post); // válasz PostResource-ként
 
     }
 
     /**
      * Display the specified resource.
      */
-    public function show(string $id)
+    public function show(string $id): PostResource
     {
-        $post = Post::findOrFail($id);
+        $post = Post::findOrFail($id); // keresés ID alapján, ha nem található, 404 hibát dob
 
-        return response()->json($post);
+        return new PostResource($post);  // válasz PostResource-ként
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Post $post)
+    public function update(Request $request, Post $post): PostResource
     {
         $data = $request->validate([
             'title' => 'required|string|max:255|min:2',
             'body' => 'required|string|min:2',
         ]);
 
-        $post->update($data);
+        $post->update($data);  // frissítés az engedélyezett mezőkkel
 
-        return $post;
+        return new PostResource($post);  // válasz PostResource-ként
     }
 
     /**
@@ -63,8 +64,8 @@ class PostController extends Controller
      */
     public function destroy(Post $post)
     {
-        $post->delete();
+        $post->delete();  // törlés
 
-        return response()->noContent(204);
+        return response()->noContent(204); // 204 No Content válasz
     }
 }

@@ -7,6 +7,8 @@ use Illuminate\Http\Resources\Json\JsonResource;
 
 class PostResource extends JsonResource
 {
+
+    public static $wrap = null; // eltünteti a "data" kulcsot a válaszból
     /**
      * Transform the resource into an array.
      *
@@ -14,6 +16,15 @@ class PostResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
-        return parent::toArray($request);
+        return [
+            'id' => $this->id,
+            'title' => $this->title,
+            'body' => $this->body,
+            'created_at' => $this->created_at->format('Y-m-d H:i:s'),
+            'updated_at' => $this->updated_at->format('Y-m-d H:i:s'),
+            'author' => [
+                new UserResource($this->whenLoaded('author')), // feltételes betöltés az author kapcsolathoz
+            ],
+        ];
     }
 }
